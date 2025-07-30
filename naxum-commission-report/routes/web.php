@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CommissionReportController;
+use App\Http\Controllers\LeaderboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,6 @@ Route::get('/', function () {
 
 // Commission Report route
 Route::get('/commission-report', [CommissionReportController::class, 'index'])->name('commission-report');
+
+// Leaderboard route
+Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');

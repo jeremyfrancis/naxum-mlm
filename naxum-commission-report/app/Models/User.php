@@ -88,4 +88,34 @@ class User extends Authenticatable
             ->where('enrolled_date', '<=', $date)
             ->count();
     }
+    
+    public static function getTopDistributorsBySales()
+    {
+        $query = "
+            SELECT
+                DENSE_RANK() OVER (ORDER BY SUM(p.price * oi.quantity) DESC) as `rank`,
+                d.id,
+                d.first_name,
+                d.last_name,
+                SUM(p.price * oi.quantity) as total_sales
+            FROM
+                users AS d
+            JOIN
+                user_category AS uc ON d.id = uc.user_id AND uc.category_id = 1
+            JOIN
+                users AS c ON d.id = c.referred_by
+            JOIN
+                orders AS o ON c.id = o.purchaser_id
+            JOIN
+                order_items AS oi ON o.id = oi.order_id
+            LEFT JOIN
+                products AS p ON oi.product_id = p.id
+            GROUP BY
+                d.id, d.first_name, d.last_name
+            ORDER BY
+                `rank` ASC
+        ";
+
+        return \Illuminate\Support\Facades\DB::select($query);
+    }
 }
