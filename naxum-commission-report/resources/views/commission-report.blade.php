@@ -27,6 +27,10 @@
         .table-hover tbody tr:hover {
             background-color: rgba(0, 0, 0, 0.03);
         }
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +47,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="distributor" class="form-label">Distributor</label>
                             <input type="text" class="form-control" id="distributor" name="distributor" 
-                                placeholder="ID, First Name, or Last Name" value="{{ $distributor ?? '' }}">
+                                placeholder="Distributor ID, First Name, or Last Name" value="{{ $distributor ?? '' }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="start_date" class="form-label">Start Date</label>
@@ -103,6 +107,16 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        Showing {{ $pagination->firstItem() ?? 0 }} to {{ $pagination->lastItem() ?? 0 }} of {{ $pagination->total() }} entries
+                    </div>
+                    <div>
+                        {{ $pagination->appends(request()->query())->links() }}
+                    </div>
                 </div>
             </div>
         </div>

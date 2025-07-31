@@ -17,6 +17,9 @@ class LeaderboardController extends Controller
     public function index(Request $request)
     {
         $allDistributors = User::getTopDistributorsBySales();
+        
+        // Limit to only top 200 distributors as per requirements
+        $allDistributors = array_slice($allDistributors, 0, 200);
 
         $perPage = 10;
         $currentPage = $request->input('page', 1);

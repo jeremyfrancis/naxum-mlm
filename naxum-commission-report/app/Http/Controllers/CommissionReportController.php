@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CommissionReportController extends Controller
 {
@@ -22,11 +23,18 @@ class CommissionReportController extends Controller
         // Apply filters
         if ($request->filled('distributor')) {
             $distributor = $request->input('distributor');
-            $query->whereHas('purchaser.referrer', function($q) use ($distributor) {
-                $q->where('id', $distributor)
-                  ->orWhere('first_name', 'like', "%{$distributor}%")
-                  ->orWhere('last_name', 'like', "%{$distributor}%");
-            });
+            
+            // Check if input is numeric for exact ID match
+            if (is_numeric($distributor)) {
+                $query->whereHas('purchaser.referrer', function($q) use ($distributor) {
+                    $q->where('id', '=', $distributor);
+                });
+            } else {
+                $query->whereHas('purchaser.referrer', function($q) use ($distributor) {
+                    $q->where('first_name', 'like', "%{$distributor}%")
+                      ->orWhere('last_name', 'like', "%{$distributor}%");
+                });
+            }
         }
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -36,7 +44,8 @@ class CommissionReportController extends Controller
             ]);
         }
 
-        $orders = $query->get();
+        // Paginate orders instead of getting all at once
+        $orders = $query->paginate(50);
 
         $reportData = [];
         foreach ($orders as $order) {
@@ -84,7 +93,8 @@ class CommissionReportController extends Controller
             $reportData[] = [
                 'invoice' => $order->invoice_number,
                 'purchaser' => $purchaser->first_name . ' ' . $purchaser->last_name,
-                'distributor' => $isDistributor ? $referrer->first_name . ' ' . $referrer->last_name : '',
+                'distributor' => $isDistributor ? $referrer->first_name . ' ' . $referrer->last_name . ' (' . $referrer->id . ')' : '',
+                'distributor_id' => $isDistributor ? $referrer->id : '',
                 'referred_distributors' => $referredDistributorsCount,
                 'order_date' => $order->order_date,
                 'percentage' => $percentage,
@@ -98,7 +108,8 @@ class CommissionReportController extends Controller
             'reportData' => $reportData,
             'distributor' => $request->input('distributor', ''),
             'start_date' => $request->input('start_date', ''),
-            'end_date' => $request->input('end_date', '')
+            'end_date' => $request->input('end_date', ''),
+            'pagination' => $orders  // Pass the pagination object to the view
         ]);
     }
 }

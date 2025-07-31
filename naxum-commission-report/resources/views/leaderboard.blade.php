@@ -18,6 +18,7 @@
 <body>
     <div class="container">
         <h1 class="mb-4">Top 200 Distributors</h1>
+        <p class="text-muted">Showing distributors ranked by total sales</p>
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
